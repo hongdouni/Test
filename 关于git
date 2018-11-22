@@ -1,0 +1,28 @@
+git clone https://github.com/hongdouni/Test
+vi 日记
+git status
+git add 日记
+git status
+git commit
+git status
+git push
+
+关于GitHub Desktop，先下载
+GitHub上项目的Clone or download 选择Open in desktop
+GitHub Desktop会检测出修改或新增的文件，可选择commit，提交后可push与github同步，github有新的也可pull更新
+
+关于冲突：
+commit push后发现冲突，pull获取最新后修改完冲突后，继续commit push
+
+git log
+选择某个commit id
+git reset --hard id		当前的版本指针指向某一版本
+git reflog		列出当前版本号之前的版本，这样就能找回最新的
+git reset --hard id 跳回未来
+
+建立分支，修改完后merge
+
+clone操作：
+输入命令：git clone xx(此处为你的项目的git地址），
+clone指定分支的工程：
+输入命令：git clone -b 分支名 git地址
