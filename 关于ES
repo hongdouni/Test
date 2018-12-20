@@ -1,0 +1,141 @@
+复合查询
+子条件查询：
+Query Context 会有_score标识匹配程度。
+全文本查询	针对文本类型
+字段级别的查询 针对结构化数据，如数字、日期等
+
+默认按_score字段排序，若指定了字段排序，返回的_score将为null，
+子条件查询：
+Query Context：
+除了判断是否满足查询条件，还会计算一个_score用来标识匹配程度，目标文档和查询条件匹配的有多好。
+全文本查询：
+模糊匹配：
+{
+	"query":{
+		"match":{
+			"titile":"ElasticSearch入门"
+		}
+	}
+}
+{
+	"query":{
+		"match_phrase":{					--这个就不会将 ElasticSearch 入 门 分成3个字段匹配
+			"titile":"ElasticSearch入门"
+		}
+	}
+}
+{
+	"query":{
+		"multi_match":{		
+			"query":"辉哥"					--query指定查询的内容
+			"field"：["author","titile"]	--其中一个字段匹配即可
+		}
+	}
+}
+语法查询，根据一定语法规则的查询，经常在kibana中使用，支持正则、通配符等。 
+{
+	"query":{
+		"query_string":{					--query_string，代表是语法查询
+			"query":"(辉哥 AND huige) OR 红豆泥"	--query指定查询的内容，逻辑运算，根据语法查询
+			"field"：["author","titile"]	--其中一个字段匹配即可
+		}
+	}
+}
+
+字段(结构化数据)级别查询：
+{
+	"query":{"term":{"author":"辉哥"}}		--term，具体项
+}
+{
+	"query":{"range":{"word_count":{"gte":1000,"lte":2000}}}
+}
+{
+	"query":{"range":{"publish_date":{"gt":2018-12-20,"lte":"now"}}}	--now代表现在
+}
+
+子条件查询的Filter Contex	，filter的结果会被缓存，所以快些？但是要结合bool使用
+查询条件是否满足条件，只有yes或no
+{"query":{"bool":{"filter":{"term":{"author":"辉哥"}}}}}
+
+复合查询：should 、must 、must not
+固定分数查询：
+{
+	"query":{
+		"constant_score":{
+			"filter":{		--必须用上filter，直接用match不被允许。
+				match{
+					"author":"辉哥"
+				}	
+			}
+			"boost":2		--查询出的_score都为2了，不设置boost，则固定分数查询出的_score为1.
+		}
+	}
+}
+bool查询
+{
+	"query":{
+		"bool":{
+			"should":[		--满足其中一个条件，or
+				{
+					"match"{
+						"author":"huige"
+					}
+				},	
+				{
+					"match"{
+						"title":"ElasticSearch"
+					}
+				}
+			]
+			"must_not":{							--一定不能满足的条件
+				"term":{"author":"zhazha"}			
+			},
+			"must":[	多个条件必须都满足，AND
+				{}，{}
+			]
+			"filter":[			--对以上查询结果过滤
+				{
+					"term":{
+						"word_count":1000
+					}
+				}
+			]
+		}
+	}
+}
+
+
+
+{
+	"query":{
+		"match_all":{}
+	}
+}
+返回所有的数据，
+返回结果：
+"took":4	--接口响应花费4毫秒
+"hits"		--代表响应的全部结果，默认返回10条数据，from和size可进行分页
+{
+	"query":{
+		"match":{
+			"titile":"ElasticSearch"
+		}
+	}
+	"sort":{"publish_date":{"order":"desc"}}
+}
+关键字查询：
+
+聚合查询
+{
+	"aggs":{
+		"group_by_word_count":{
+			"terms":{
+				"field":"word_count"
+			}
+		}
+	}
+}
+group_by_word_count 是自定义的聚合查询名称。
+terms 函数返回不同word_count值的统计，比如word_count=1000的有3个，word_count=100的有两个
+stats 函数，对 word_count 子弹进行一系列的统计计算；总数，最大最小值，总和，平均值
+min 函数，返回最小值
